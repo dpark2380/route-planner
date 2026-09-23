@@ -32,4 +32,31 @@ describe("validateRouteSearchRequest", () => {
     expect(validateRouteSearchRequest(null).valid).toBe(false);
     expect(validateRouteSearchRequest("not an object").valid).toBe(false);
   });
+
+  it("accepts coordinates in place of a place ID", () => {
+    const result = validateRouteSearchRequest({
+      origin: { lat: -33.86, lng: 151.2 },
+      destination: { placeId: "B" },
+    });
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects identical coordinates for origin and destination", () => {
+    const result = validateRouteSearchRequest({
+      origin: { lat: -33.86, lng: 151.2 },
+      destination: { lat: -33.86, lng: 151.2 },
+    });
+    expect(result).toEqual({
+      valid: false,
+      message: "Origin and destination must differ.",
+    });
+  });
+
+  it("rejects out-of-range coordinates", () => {
+    const result = validateRouteSearchRequest({
+      origin: { lat: 999, lng: 151.2 },
+      destination: { placeId: "B" },
+    });
+    expect(result.valid).toBe(false);
+  });
 });

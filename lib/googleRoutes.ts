@@ -1,4 +1,5 @@
 import type { GoogleComputeRoutesResponse } from "./normalizeRoutes";
+import type { PlaceRef } from "@/types/route";
 
 const COMPUTE_ROUTES_URL = "https://routes.googleapis.com/directions/v2:computeRoutes";
 const UPSTREAM_TIMEOUT_MS = 10_000;
@@ -9,7 +10,10 @@ export class UpstreamTimeoutError extends Error {}
 export class UpstreamError extends Error {}
 export class QuotaExceededError extends Error {}
 
-type PlaceRef = { placeId: string };
+function toWaypoint(ref: PlaceRef) {
+  if ("placeId" in ref) return { placeId: ref.placeId };
+  return { location: { latLng: { latitude: ref.lat, longitude: ref.lng } } };
+}
 
 async function computeRoutes(
   origin: PlaceRef,
@@ -30,8 +34,8 @@ async function computeRoutes(
         "X-Goog-FieldMask": FIELD_MASK,
       },
       body: JSON.stringify({
-        origin: { placeId: origin.placeId },
-        destination: { placeId: destination.placeId },
+        origin: toWaypoint(origin),
+        destination: toWaypoint(destination),
         travelMode: "DRIVE",
         routingPreference: "TRAFFIC_AWARE",
         computeAlternativeRoutes: !avoidTolls,

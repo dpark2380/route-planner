@@ -34,7 +34,9 @@ export type RouteSearchError = {
   message: string;
 };
 
+export type PlaceRef = { placeId: string } | { lat: number; lng: number };
+
 export type RouteSearchRequest = {
-  origin: { placeId: string };
-  destination: { placeId: string };
+  origin: PlaceRef;
+  destination: PlaceRef;
 };
