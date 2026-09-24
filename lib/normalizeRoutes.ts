@@ -123,9 +123,3 @@ export function normalizeRoutes(
 
   return mergeDuplicates([...normalRoutes, ...avoidTollsRoutes]);
 }
-
-export function labelToll(route: RouteOption): string | null {
-  if (route.toll.status === "none") return "No tolls";
-  if (route.toll.status === "unknown") return "Toll cost unavailable";
-  return null;
-}

@@ -73,6 +73,39 @@ export function resamplePolyline(
   return resampled;
 }
 
+// Picks up to `count` waypoints spread evenly along the route, trimming a
+// margin off each end so waypoints don't land on entrance/exit ramps right
+// next to the origin/destination (spec section 6).
+const WAYPOINT_END_MARGIN_METERS = 300;
+
+export function pickWaypoints(encoded: string, count: number): LatLng[] {
+  if (count <= 0) return [];
+
+  const points = decodePolyline(encoded);
+  if (points.length < 3) return [];
+  const start = points[0];
+  const end = points[points.length - 1];
+
+  // resamplePolyline always appends the exact endpoint, so the last 300m mark
+  // can sit arbitrarily close to the destination; filter both ends explicitly.
+  const candidates = resamplePolyline(points, WAYPOINT_END_MARGIN_METERS)
+    .slice(1, -1)
+    .filter(
+      (point) =>
+        haversineMeters(point, start) >= WAYPOINT_END_MARGIN_METERS &&
+        haversineMeters(point, end) >= WAYPOINT_END_MARGIN_METERS,
+    );
+
+  // With no more candidates than requested, spreading them would repeat points.
+  if (candidates.length <= count) return candidates;
+
+  const waypoints: LatLng[] = [];
+  for (let i = 1; i <= count; i++) {
+    waypoints.push(candidates[Math.floor((i * candidates.length) / (count + 1))]);
+  }
+  return waypoints;
+}
+
 function nearestDistance(point: LatLng, others: LatLng[]): number {
   let min = Infinity;
   for (const other of others) {
@@ -83,12 +116,28 @@ function nearestDistance(point: LatLng, others: LatLng[]): number {
 }
 
 const SAMPLE_INTERVAL_METERS = 50;
-const MATCH_DISTANCE_THRESHOLD_METERS = 75;
 const ENDPOINT_DISTANCE_THRESHOLD_METERS = 100;
+// Bulk check: the same corridor stays within noise of itself for most of its
+// length, so parallel roads 80m+ apart are kept as separate options.
+const MEDIAN_DISTANCE_THRESHOLD_METERS = 75;
+// Divergence check: routes sharing their approaches but splitting for a
+// stretch (e.g. Harbour Bridge vs Tunnel) pass the median test, so also reject
+// any sustained stretch that sits far apart. Counting points rather than
+// taking a percentile keeps one stray point on a short route from deciding
+// the result. Calibrated on the real Chatswood-to-Opera-House alternatives in
+// lib/__fixtures__/chatswood-opera-house-routes.json.
+const DIVERGENCE_DISTANCE_METERS = 200;
+const MAX_DIVERGENT_LENGTH_METERS = 300;
 
-// Two routes are treated as the same corridor when their resampled points
-// stay close together throughout, and their endpoints coincide.
-// Thresholds are starting points to tune against real Sydney trips (spec section 10).
+function median(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.floor(sorted.length / 2)];
+}
+
+// Two routes are treated as the same corridor when their endpoints coincide,
+// they run together for most of their length, and they never split apart for
+// a meaningful stretch. Thresholds are starting points to tune against real
+// Sydney trips (spec section 10).
 export function areRoutesEquivalent(
   encodedA: string,
   encodedB: string,
@@ -111,9 +160,17 @@ export function areRoutesEquivalent(
 
   const sampledA = resamplePolyline(pointsA, SAMPLE_INTERVAL_METERS);
   const sampledB = resamplePolyline(pointsB, SAMPLE_INTERVAL_METERS);
-  const distances = sampledA.map((p) => nearestDistance(p, sampledB));
-  distances.sort((a, b) => a - b);
-  const median = distances[Math.floor(distances.length / 2)];
+  // Symmetric: checked both directions since sample counts/density can differ.
+  const distancesAtoB = sampledA.map((p) => nearestDistance(p, sampledB));
+  const distancesBtoA = sampledB.map((p) => nearestDistance(p, sampledA));
 
-  return median <= MATCH_DISTANCE_THRESHOLD_METERS;
+  if (Math.max(median(distancesAtoB), median(distancesBtoA)) > MEDIAN_DISTANCE_THRESHOLD_METERS) {
+    return false;
+  }
+
+  const divergentPoints = Math.max(
+    distancesAtoB.filter((d) => d > DIVERGENCE_DISTANCE_METERS).length,
+    distancesBtoA.filter((d) => d > DIVERGENCE_DISTANCE_METERS).length,
+  );
+  return divergentPoints * SAMPLE_INTERVAL_METERS < MAX_DIVERGENT_LENGTH_METERS;
 }

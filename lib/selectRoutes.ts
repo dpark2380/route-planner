@@ -120,3 +120,61 @@ export function selectBestValue(
 
   return best;
 }
+
+export type DisplayRoute = {
+  route: RouteOption;
+  badges: string[];
+};
+
+// Builds the deduplicated card list for section 4: fastest, within-budget
+// recommendation, toll-free (if any), and other non-dominated known-price
+// options, plus unknown-price routes kept separate "for inspection."
+export function selectDisplayRoutes(
+  routes: RouteOption[],
+  budgetCents: number,
+): DisplayRoute[] {
+  if (routes.length === 0) return [];
+
+  const badgesById = new Map<string, string[]>();
+  const addBadge = (routeId: string, badge: string) => {
+    const existing = badgesById.get(routeId) ?? [];
+    if (!existing.includes(badge)) existing.push(badge);
+    badgesById.set(routeId, existing);
+  };
+
+  const fastestOverall = [...routes].sort(
+    (a, b) => a.durationSeconds - b.durationSeconds,
+  )[0];
+  addBadge(fastestOverall.id, "Fastest");
+
+  const withinBudget = selectWithinBudget(routes, budgetCents);
+  if (withinBudget) addBadge(withinBudget.id, "Recommended");
+
+  const tollFreeCandidates = routes
+    .filter((route) => route.toll.status === "none")
+    .sort((a, b) => a.durationSeconds - b.durationSeconds);
+  const tollFree = tollFreeCandidates[0];
+  if (tollFree) addBadge(tollFree.id, "No tolls");
+
+  const known = knownPriceRoutes(routes);
+  const frontier = computeFrontier(known);
+  const keptIds = new Set<string>([
+    ...frontier.map((r) => r.id),
+    fastestOverall.id,
+    ...(tollFree ? [tollFree.id] : []),
+  ]);
+
+  const unknownPrice = routes.filter((route) => route.toll.status === "unknown");
+  for (const route of unknownPrice) {
+    keptIds.add(route.id);
+    addBadge(route.id, "Toll cost unavailable");
+  }
+
+  const displayed = routes.filter((route) => keptIds.has(route.id));
+  return displayed
+    .sort((a, b) => a.durationSeconds - b.durationSeconds)
+    .map((route) => ({
+      route,
+      badges: [...(badgesById.get(route.id) ?? []), ...route.labels],
+    }));
+}

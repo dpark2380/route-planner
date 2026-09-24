@@ -1,0 +1,42 @@
+{
+  "routes": [
+    {
+      "distanceMeters": 11522,
+      "duration": "848s",
+      "polyline": {
+        "encodedPolyline": "jxgmEy}uy[@Ix@J\\?tBUdFmAZM^IzBw@lDwA~Ac@~@K|AIjCFzHn@~ALrEKr@G~Cs@l@GjACjAJp@VrC`ChHbDl@j@|BdD`@BRGtCeB`@e@Tg@Hg@JiBNuCZaCdA{F\\cC?GvBaNl@qJLuC@aDEkDQoD[sDYwBF[aAgEoAiF_@eCWwCEgBDwBLgBXkBj@wBn@aBt@wAz@mApAsA`Au@jC{A|C}AbOyIfAu@nC_CrCcCdIkGxBwBrAkBt@uAdAqCr@kCj@_Dt@qEZwBVqAd@{Ar@_BhAcBz@cA`A_ANc@r@u@vAiA~@e@fDeApAW|BUbB?v@@bBVlAd@l@\\rAbAzCfCvBtAhAn@bGlCdAVrEx@PA`DTbITvB@dAFfEf@|@FtAArIm@z@MH@fHaBjDcA~FoAlEm@nBK~BJtAR|@RPAjA`@x]jRlBnAvTnL|DnApARf@Cb@Ob@_@Vg@Lo@TkElAeXN}DTuAAQNg@Va@\\U`@Iz@BdATt@\\XTRn@@bBSGgJo@UE_EUoFi@WKGPMBIGCS@C"
+      },
+      "travelAdvisory": {
+        "tollInfo": {}
+      }
+    },
+    {
+      "distanceMeters": 11604,
+      "duration": "1005s",
+      "polyline": {
+        "encodedPolyline": "jxgmEy}uy[@Ix@J\\?tBUdFmAZM^IzBw@lDwA~Ac@~@K|AIjCFzHn@~ALrEKr@G~Cs@l@GjACjAJp@VrC`ChHbDl@j@|BdD`@BRGtCeB`@e@Tg@Hg@JiBNuCZaCdA{F\\cC?GvBaNl@qJLuC@aDEkDQoD[sDYwBF[aAgEoAiF_@eCWwCEgBDwBLgBXkBj@wBn@aBt@wAz@mApAsA`Au@jC{A|C}AbOyIfAu@nC_CrCcCdIkGxBwBrAkBt@uAdAqCr@kCj@_Dt@qEZwBVqAd@{Ar@_BhAcBz@cA`A_ANc@r@u@vAiA~@e@fDeApAW|BUbB?v@@bBVlAd@l@\\rAbAzCfCvBtAhAn@bGlCdAVfF|@~ARnCh@hBVXFpHh@vFJbCC|BQfC[lCi@vKiCn@MVF~GaBtBc@jBMzA@zALrAVtAj@dQrJpPtI|RjKVCtFnB|A\\JTjB^b@N`ATnFfBZ@ZGLIRYZaAA{E?oBFc@L[XWBGBe@KwE@oBIYCkBGg@i@sME_@gJo@UE_EUoFi@WKGPMBIGCS@C"
+      },
+      "travelAdvisory": {
+        "tollInfo": {
+          "estimatedPrice": [
+            {
+              "currencyCode": "AUD",
+              "units": "3",
+              "nanos": 310000000
+            }
+          ]
+        }
+      }
+    },
+    {
+      "distanceMeters": 11272,
+      "duration": "1001s",
+      "polyline": {
+        "encodedPolyline": "jxgmEy}uy[@Ix@J\\?tBUdFmAZM^IzBw@lDwA~Ac@~@K|AIjCFzHn@~ALrEKr@GaCiGdGaD`Ak@nEaDDGMs@GMAEGKCKiCkEIE?KHEDBhAu@GYt@iKCy@BEHYBGp@eJEKFI@?zB_[AMHKL@DL?B\\D~C@VQzA}Cb@{FEMFKBA|AkTJcAhNCbAOjSgJJMfE{BpCgB|EqDxAiAN?dIkGxBwBrAkBt@uAdAqCr@kCj@_Dt@qEZwBVqAd@{Ar@_BhAcBz@cA`A_ANc@r@u@vAiA~@e@fDeApAW|BUbB?v@@bBVlAd@l@\\rAbAzCfCvBtAhAn@bGlCdAVrEx@PA`DTbITvB@dAFfEf@|@FtAArIm@z@MH@fHaBjDcA~FoAlEm@nBK~BJtAR|@RPAjA`@x]jRlBnAvTnL|DnApARf@Cb@Ob@_@Vg@Lo@TkElAeXN}DTuAAQNg@Va@\\U`@Iz@BdATt@\\XTRn@@bBSGgJo@UE_EUoFi@WKGPMBIGCS@C"
+      },
+      "travelAdvisory": {
+        "tollInfo": {}
+      }
+    }
+  ]
+}

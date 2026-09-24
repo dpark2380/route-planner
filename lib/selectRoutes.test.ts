@@ -3,6 +3,7 @@ import {
   computeFrontier,
   isKnownPrice,
   selectBestValue,
+  selectDisplayRoutes,
   selectWithinBudget,
   type KnownPriceRoute,
 } from "./selectRoutes";
@@ -125,6 +126,40 @@ describe("selectBestValue", () => {
     const unknown = makeRoute({ id: "unknown", durationSeconds: 900, toll: { status: "unknown", cents: null, currency: null } });
 
     expect(selectBestValue([base, unknown], 500)).toBeNull();
+  });
+});
+
+describe("selectDisplayRoutes", () => {
+  it("renders one card per route even when several badges apply", () => {
+    const onlyRoute = makeRoute({ id: "only", toll: { status: "none", cents: 0, currency: "AUD" } });
+    const display = selectDisplayRoutes([onlyRoute], 500);
+
+    expect(display).toHaveLength(1);
+    expect(display[0].badges).toEqual(expect.arrayContaining(["Fastest", "Recommended", "No tolls"]));
+  });
+
+  it("drops a dominated route but keeps the fastest and toll-free routes for context", () => {
+    const fastest = makeRoute({ id: "fastest", durationSeconds: 900, toll: { status: "estimated", cents: 1000, currency: "AUD" } });
+    const dominant = makeRoute({ id: "dominant", durationSeconds: 1500, toll: { status: "estimated", cents: 300, currency: "AUD" } });
+    const dominated = makeRoute({ id: "dominated", durationSeconds: 1800, toll: { status: "estimated", cents: 400, currency: "AUD" } });
+
+    const display = selectDisplayRoutes([fastest, dominant, dominated], 1000);
+    const ids = display.map((d) => d.route.id);
+
+    expect(ids).toContain("fastest");
+    expect(ids).toContain("dominant");
+    expect(ids).not.toContain("dominated");
+  });
+
+  it("keeps unknown-price routes separate, labeled, and never marked recommended", () => {
+    const known = makeRoute({ id: "known", durationSeconds: 1800, toll: { status: "estimated", cents: 300, currency: "AUD" } });
+    const unknown = makeRoute({ id: "unknown", durationSeconds: 900, toll: { status: "unknown", cents: null, currency: null } });
+
+    const display = selectDisplayRoutes([known, unknown], 500);
+    const unknownEntry = display.find((d) => d.route.id === "unknown");
+
+    expect(unknownEntry?.badges).toContain("Toll cost unavailable");
+    expect(unknownEntry?.badges).not.toContain("Recommended");
   });
 });
 
